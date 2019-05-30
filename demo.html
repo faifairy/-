@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        .box {
+            width: 730px;
+            height: 454px;
+            border: 1px solid #ccc;
+            margin: 60px auto;
+            padding: 10px;
+            position: relative;
+        }
+
+        .imgBox {
+            width: 730px;
+            height: 454px;
+            position: relative;
+            overflow: hidden;
+
+        }
+
+        .imgBox ul {
+            list-style: none;
+            width: 4380px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .imgBox ul li {
+            width: 730px;
+            height: 454px;
+            float: left;
+        }
+
+        .imgBox ol {
+            list-style: none;
+            position: absolute;
+            left: 50%;
+            bottom: 10px;
+            transform: translate(-50%,-50%);
+        }
+
+        .imgBox ol li {
+            width: 20px;
+            height: 20px;
+            float: left;
+            border-radius: 10px 10px 10px 10px;
+            background-color: black;
+            color: white;
+            text-align: center;
+            font: 400 12px/20px "微软雅黑";
+            margin: 0 2px;
+            cursor: pointer;
+        }
+
+        .imgBox ol li.current {
+            background-color: purple;
+        }
+
+        .arr {
+            display: none;
+        }
+
+        .arr span {
+            width: 40px;
+            height: 40px;
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            margin-top: -20px;
+            background: #000;
+            cursor: pointer;
+            line-height: 40px;
+            text-align: center;
+            font-weight: bold;
+            font-family: "黑体";
+            font-size: 30px;
+            color: #fff;
+            opacity: 0.3;
+            border: 1px solid #fff;
+
+        }
+
+        .arr .arrRight {
+            right: 15px;
+            left: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="box" id="box">
+        <div class="imgBox" id=imgBox>
+            <ul>
+                <li><img src="./images/01.jpg" alt=""/></li>
+                <li><img src="./images/02.jpg" alt=""/></li>
+                <li><img src="./images/03.jpg" alt=""/></li>
+                <li><img src="./images/04.jpg" alt=""/></li>
+                <li><img src="./images/05.jpg" alt=""/></li>
+            </ul>
+
+            <ol>
+
+            </ol>
+        </div>
+        
+        <div class="arr" id="arr">
+            <span class="arrLeft" id="arrLeft">&lt;</span>
+            <span class="arrRight" id="arrRight">&gt;</span>
+        </div>
+    </div>
+</body>
+</html>
+
+
+<script>
+    var box=document.getElementById("box");
+    var imgBox=document.getElementById("imgBox");
+    var ullis=imgBox.children[0].children;
+    var imgWidth=imgBox.children[0].children[0].offsetWidth;
+    var arr=document.getElementById("arr");
+    var arrLeft=document.getElementById("arrLeft");
+    var arrRight=document.getElementById("arrRight");
+    var timer=null;
+    var pic=0;
+    var square=0;
+
+
+    // 根据图片数量创建按钮个数
+    for(var i=0;i<ullis.length;i++) {
+        var li=document.createElement("li");
+        li.innerHTML=i+1;
+        imgBox.children[1].appendChild(li);
+    }
+
+
+    // 给第一个按钮添加样式
+    var ollis=imgBox.children[1].children;
+    ollis[0].className="current";
+
+
+    // 复制第一张图片放到最后
+    var img01=ullis[0].cloneNode(true);
+    imgBox.children[0].appendChild(img01);
+
+
+    // 点击按钮显示对应图片
+    for(var i=0;i<ollis.length;i++) {
+        ollis[i].index=i;
+        ollis[i].onmouseover=function () {
+            for(var j=0;j<ollis.length;j++) {
+                ollis[j].className="";
+            }
+            this.className="current";
+
+            var target=-this.index*imgWidth;
+
+            animate(imgBox.children[0],target);
+
+            pic=square=this.index;
+        }
+    }
+
+
+    // 鼠标进入，显示箭头，播放停止
+    box.onmouseover=function () {
+        arr.style.display="block";
+
+        clearInterval(timer);
+    }
+
+    // 鼠标离开，隐藏箭头，继续播放
+    box.onmouseout=function () {
+        arr.style.display="none";
+
+        timer=setInterval(playNext,2000);
+    }
+
+
+    // 点击箭头播放图片
+    arrRight.onclick=function () {
+        playNext();
+    }
+
+
+    // 点击箭头播放图片
+    arrLeft.onclick=function () {
+        if (pic==0) {
+            imgBox.children[0].style.left=-(ullis.length-1)*imgWidth+"px";
+            pic=ullis.length-1;
+        }
+        pic--;
+
+        var target=-pic*imgWidth;
+
+        animate(imgBox.children[0],target);
+
+        square--;
+
+        if (square==-1) {
+            square=ollis.length-1;
+        }
+
+        for(var i=0;i<ollis.length;i++) {
+            ollis[i].className="";
+        }
+        ollis[square].className="current";
+    }
+
+
+    // 自动播放图片
+    timer=setInterval(playNext,2000);
+
+
+    // 自动播放函数
+    function playNext() {
+        if (pic==ullis.length-1) {
+            imgBox.children[0].style.left=0;
+            pic=0;
+        }
+        pic++;
+
+        var target=-pic*imgWidth;
+
+        animate(imgBox.children[0],target);
+
+        square++;
+
+        if (square>ollis.length-1) {
+            square=0;
+        }
+
+        for(var i=0;i<ollis.length;i++) {
+            ollis[i].className="";
+        }
+        ollis[square].className="current";
+    }
+
+
+    // 缓动函数
+    function animate(obj,target) {
+        clearInterval(obj.timer);
+        obj.timer=setInterval(function () {
+            var leader=obj.offsetLeft;
+            var step=(target-leader)/10;
+
+            step=step>0?Math.ceil(step):Math.floor(step);
+
+            if (leader!=target) {
+                obj.style.left=leader+step+"px";
+            }else {
+                clearInterval(obj.timer);
+            }
+
+        },20);
+    }
+
+
+</script>
